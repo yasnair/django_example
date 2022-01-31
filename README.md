@@ -1,2 +1,2 @@
 # django_example
-CreateAPI using Django framework
+Create API using Django framework
