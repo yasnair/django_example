@@ -36,6 +36,8 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+Pipfile
+Pipfile.lock
 
 # Unit test / coverage reports
 htmlcov/
@@ -110,6 +112,7 @@ ENV/
 env.bak/
 venv.bak/
 
+
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -127,3 +130,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+### Django ###
+*.log
+*.pot
+*.pyc
+__pycache__/
+local_settings.py
+media
+
+db.sqlite3
+mydatabase
