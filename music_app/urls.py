@@ -1,9 +1,18 @@
+import imp
+from xml.etree.ElementInclude import include
 from django.urls import path
+from rest_framework.routers import DefaultRouter
 from . import views
 
+
+
+router = DefaultRouter()
+router.register('users', views.UserViewSet)
+router.register('playlist', views.PlaylistViewSet)
+router.urls
+
+
 #URLConf
-urlpatterns = [
-    #path('users/', UserView.as_view()), 
-    path('users/', views.user_list),
-    path('users/<id>/', views.user_detail), 
-]
+urlpatterns = router.urls
+
+

@@ -1,6 +1,7 @@
 
 #from pyexpat import model
 from operator import index
+from tkinter import CASCADE
 import uuid
 from django.db import models
 from django.forms import model_to_dict
@@ -21,6 +22,11 @@ class User(models.Model):
         indexes  = [
             models.Index(fields=['display_name'])
         ]
+
+    def __str__(self) -> str:
+        return self.display_name
+
+
 
 class Playlist(models.Model):
     id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
