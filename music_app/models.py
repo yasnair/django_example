@@ -2,7 +2,6 @@
 #from pyexpat import model
 from operator import index
 from tkinter import CASCADE
-import uuid
 from django.db import models
 from django.forms import model_to_dict
 
@@ -12,10 +11,15 @@ from django.forms import model_to_dict
 class User(models.Model):
     id           = models.CharField(primary_key=True, max_length=255, editable=True)
     display_name = models.CharField(max_length=255)
-    #email        = models.EmailField(max_length=255)
+    active       = models.BooleanField(null=False, default=True) 
     create_at    = models.DateTimeField(auto_now_add=True)
     last_update  = models.DateTimeField(auto_now=True)
-    playlists    = models.ManyToManyField('Playlist', through='Users_Playlists', blank=True)
+    playlists    = models.ManyToManyField(
+                    'Playlist',
+                    through='UsersPlaylists',
+                    through_fields=('user', 'playlist'),
+                    related_name='playlists',
+                )
 
     class Meta:
         ordering = ['display_name']
@@ -29,10 +33,10 @@ class User(models.Model):
 
 
 class Playlist(models.Model):
-    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id            = models.CharField(primary_key=True, max_length=255, editable=True)
     name          = models.CharField(max_length=255)
     collaborative = models.BooleanField(null=False, default=False) 
-    public        = models.BooleanField(null=False, default=False)
+    public        = models.BooleanField(null=False, default=True)
     description   = models.CharField(max_length=255, null=True)
     create_at     = models.DateTimeField(auto_now_add=True)
     last_update   = models.DateTimeField(auto_now=True)
@@ -45,7 +49,7 @@ class Playlist(models.Model):
     
 
     
-class Users_Playlists(models.Model):
+class UsersPlaylists(models.Model):
     USER_TYPE_OWNER = 'O'
     USER_TYPE_COLLA = 'C'
     USER_TYPE_CHOICES = [

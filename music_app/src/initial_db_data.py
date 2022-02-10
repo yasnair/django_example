@@ -1,42 +1,44 @@
+from re import I
 from requests.sessions import session
 import requests
 import os
-import sys
+from utils import BASE_URL, AUTH_URL
+
+
 
 #Class to access Spotify API
 class Spotify():
-    def __init__ (self, user_id):
+    def __init__ (self):
         self.token      = None
         self.expires_in = None
-        self.user_id  = user_id
         self.limit = 50
         self.offset = 0
-        self.get_token()
+        #self.get_token()
         self.headers = {'Authorization': 'Bearer {token}'}
 
 
     #Obtiene Token de autorizacion   
     def get_token(self):
         # Get token from Spotify - POST
-        auth_response = requests.post(os.environ.get('AUTH_URL'), {
+        auth_response = requests.post(AUTH_URL, {
             'grant_type': 'client_credentials',
             'client_id': os.environ.get('CLIENT_ID'),
             'client_secret': os.environ.get('CLIENT_SECRET'),
          }).json()
-
+        '''
         self.token       = auth_response['access_token']
         self.expires_in  = auth_response['expires_in']
         self.headers['Authorization'] = 'Bearer {token}'.format(token=self.token)
-
+        '''
 
             # save the access token
             #access_token = auth_response['access_token']
-        #return auth_response['access_token']
+        return os.environ.get('CLIENT_ID')
 
     def get_user_playlists(self):
         
         #Get User's Playlists
-        playlist_info = []   #pd.DataFrame(columns=['id','name'])
+        playlist_info = []   
 
         request = requests.get(BASE_URL + 'users/'+ self.user_id + '/playlists',
                                     headers=headers,
@@ -46,7 +48,7 @@ class Spotify():
         for playlist in user_playlist:
             #playlist_info  = playlist_info.append({'id': playlist['id'], 'name': playlist['name']})
             playlist_info.append({'id': playlist['id'], 'name': playlist['name']})
-        return json.dumps(playlist_info, indent=4)    
+        return playlist_info 
 
     def is_token_valid(self):
         #Falta implementar
