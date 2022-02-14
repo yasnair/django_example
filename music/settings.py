@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 # Initialise environment variables
-import environ
+import environ, os
 
 env = environ.Env()
 # reading .env file
@@ -90,6 +90,9 @@ DATABASES = {
         'PASSWORD': env("DB_PASS"),
         'HOST': env("DB_HOST"),
         'PORT': env("DB_PORT"),
+        'TEST': {
+            'NAME': 'test_music',
+        },
     }
 }
 
@@ -135,5 +138,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = env('CLIENT_ID')
+CLIENT_ID = os.environ.get('CLIENT_ID')
 

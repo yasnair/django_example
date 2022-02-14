@@ -8,16 +8,17 @@ import pprint
 
 
 router = DefaultRouter()
-router.register('users', views.UserViewSet)
-router.register('playlist', views.PlaylistViewSet)
+router.register(r'users', views.UserViewSet)
+router.register(r'playlist', views.PlaylistViewSet)
 router.urls
 
 
 
 #URLConf
 urlpatterns = router.urls
+#
 #urlpatterns = [
-#    path('', include(router.urls)),
+#   path('', include(router.urls)),
 #]
 
 

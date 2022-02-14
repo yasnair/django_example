@@ -2,6 +2,7 @@
 #from pyexpat import model
 from operator import index
 from tkinter import CASCADE
+from urllib import request
 from django.db import models
 from django.forms import model_to_dict
 
@@ -18,7 +19,7 @@ class User(models.Model):
                     'Playlist',
                     through='UsersPlaylists',
                     through_fields=('user', 'playlist'),
-                    related_name='playlists',
+                    related_name='users',
                 )
 
     class Meta:
@@ -35,9 +36,9 @@ class User(models.Model):
 class Playlist(models.Model):
     id            = models.CharField(primary_key=True, max_length=255, editable=True)
     name          = models.CharField(max_length=255)
-    collaborative = models.BooleanField(null=False, default=False) 
-    public        = models.BooleanField(null=False, default=True)
-    description   = models.CharField(max_length=255, null=True)
+    collaborative = models.BooleanField(default=False) 
+    public        = models.BooleanField(default=True)
+    description   = models.CharField(max_length=255,blank=True, null=True)
     create_at     = models.DateTimeField(auto_now_add=True)
     last_update   = models.DateTimeField(auto_now=True)
     class Meta:
@@ -57,8 +58,8 @@ class UsersPlaylists(models.Model):
         (USER_TYPE_COLLA, 'Collaborator')
 
     ]
-    user      = models.ForeignKey(User, on_delete=models.CASCADE)
-    playlist  = models.ForeignKey(Playlist, on_delete=models.CASCADE)
+    user      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='userplaylist')
+    playlist  = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='userplaylist')
     user_type = models.CharField(max_length=1, choices=USER_TYPE_CHOICES, default=USER_TYPE_OWNER)
 
 

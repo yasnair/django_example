@@ -1,7 +1,7 @@
 from cgitb import lookup
 from re import I
 from django.shortcuts import get_object_or_404, render
-from music_app.models import User, Playlist
+from music_app.models import User, Playlist, UsersPlaylists
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import generics, status
@@ -17,7 +17,7 @@ from .models import User
 class UserViewSet(ModelViewSet):
     queryset = User.objects.filter(active=True)
     serializer_class = UserSerializer
-    lookup_field = 'user_id'
+    
 
     def get_serializer_context(self):
         return {'request': self.request}
@@ -34,7 +34,7 @@ class UserViewSet(ModelViewSet):
 
 #Playlist
 class PlaylistViewSet(ModelViewSet):
-    queryset = Playlist.objects.all()
+    queryset = Playlist.objects.filter(userplaylist__user_type=UsersPlaylists.USER_TYPE_OWNER)
     serializer_class = PlaylistSerializer
     lookup_field = 'playlist_id'
     
