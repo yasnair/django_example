@@ -2,9 +2,8 @@
 #from pyexpat import model
 from operator import index
 from tkinter import CASCADE
-from urllib import request
 from django.db import models
-from django.forms import model_to_dict
+from django.contrib import admin
 
 
 # Create your models here.
@@ -12,15 +11,9 @@ from django.forms import model_to_dict
 class User(models.Model):
     id           = models.CharField(primary_key=True, max_length=255, editable=True)
     display_name = models.CharField(max_length=255)
-    active       = models.BooleanField(null=False, default=True) 
+    active       = models.BooleanField(default=True) 
     create_at    = models.DateTimeField(auto_now_add=True)
     last_update  = models.DateTimeField(auto_now=True)
-    playlists    = models.ManyToManyField(
-                    'Playlist',
-                    through='UsersPlaylists',
-                    through_fields=('user', 'playlist'),
-                    related_name='users',
-                )
 
     class Meta:
         ordering = ['display_name']
@@ -38,52 +31,88 @@ class Playlist(models.Model):
     name          = models.CharField(max_length=255)
     collaborative = models.BooleanField(default=False) 
     public        = models.BooleanField(default=True)
-    description   = models.CharField(max_length=255,blank=True, null=True)
+    description   = models.CharField(max_length=255,blank=True, null=True)     
     create_at     = models.DateTimeField(auto_now_add=True)
     last_update   = models.DateTimeField(auto_now=True)
+    users   = models.ManyToManyField(
+                'User',
+                through='UsersPlaylists',
+                through_fields=('playlist', 'user'),
+                related_name='playlists',
+            )
     class Meta:
         ordering = ['name']
         indexes  = [
             models.Index(fields=['name'])
         ]
 
-    
 
-    
+
 class UsersPlaylists(models.Model):
-    USER_TYPE_OWNER = 'O'
-    USER_TYPE_COLLA = 'C'
+    OWNER  = 'O'
+    COLLAB = 'C'
     USER_TYPE_CHOICES = [
-        (USER_TYPE_OWNER, 'Owner'),
-        (USER_TYPE_COLLA, 'Collaborator')
+        (OWNER, 'Owner'),
+        (COLLAB, 'Collaborator')
 
     ]
     user      = models.ForeignKey(User, on_delete=models.CASCADE, related_name='userplaylist')
     playlist  = models.ForeignKey(Playlist, on_delete=models.CASCADE, related_name='userplaylist')
-    user_type = models.CharField(max_length=1, choices=USER_TYPE_CHOICES, default=USER_TYPE_OWNER)
+    user_type = models.CharField(max_length=1, choices=USER_TYPE_CHOICES, default=OWNER)
 
 
 
-
-
-'''
-class Track(models.Model):
-    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Artist (models.Model):
+    id            = models.CharField(primary_key=True, max_length=255, editable=True)
     name          = models.CharField(max_length=255)
-    duration_ms   = models.IntegerField( )
     create_at     = models.DateTimeField(auto_now_add=True)
     last_update   = models.DateTimeField(auto_now=True)
+    
 
 class Album(models.Model):
-    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    ALBUM  = 'A'
+    SINGLE = 'S'
+    COMPIL = 'C'
+    ALBUM_TYPE_CHOICES = [
+        (ALBUM, 'Album'),
+        (SINGLE, 'Single'),
+        (COMPIL, 'Compilation')
+
+    ]
+    id            = models.CharField(primary_key=True, max_length=255, editable=True)
     name          = models.CharField(max_length=255)
+    type          = models.CharField(max_length=1, choices=ALBUM_TYPE_CHOICES, null=False)
     release_date  = models.DateField()
     create_at     = models.DateTimeField(auto_now_add=True)
     last_update   = models.DateTimeField(auto_now=True)
+    artists       = models.ManyToManyField(
+                    'Artist',
+                    through='AlbumsArtists',
+                    through_fields=('album', 'artist'),
+                    related_name='artists',
+                )
 
-class Artist (models.Model):
-    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+
+class AlbumsArtists(models.Model):
+    album   = models.ForeignKey(Album, on_delete=models.CASCADE, related_name='albumartist')
+    artist  = models.ForeignKey(Artist, on_delete=models.CASCADE, related_name='albumartist')
+
+class Track(models.Model):
+    id            = models.CharField(primary_key=True, max_length=255, editable=True)
     name          = models.CharField(max_length=255)
+    duration_ms   = models.IntegerField( )
+    explicit      = models.BooleanField(default=False) 
     create_at     = models.DateTimeField(auto_now_add=True)
     last_update   = models.DateTimeField(auto_now=True)
-'''
+    album         = models.ForeignKey(AlbumsArtists, on_delete=models.CASCADE, null=False)
+
+class UsersPlaylistsInline(admin.TabularInline):
+    model = UsersPlaylists
+    extra = 1
+class UserAdmin(admin.ModelAdmin):
+    inlines = (UsersPlaylistsInline,)
+
+class PlaylistAdmin(admin.ModelAdmin):
+    inlines = (UsersPlaylistsInline,)
+

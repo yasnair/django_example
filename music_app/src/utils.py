@@ -7,6 +7,7 @@ import os, json
 #Urls constants
 AUTH_URL = 'https://accounts.spotify.com/api/token'
 BASE_URL = 'https://api.spotify.com/v1/'
+USER_URL = 'http://127.0.0.1:8000/api/users/'
 
 #This must be in enviroment variables
 CLIENT_ID = "5727d237fa69491eafa4979065ac7649"
@@ -47,16 +48,71 @@ class Spotify():
         self.headers['Authorization'] = 'Bearer {token}'.format(token=self.token)
 
         #return auth_response 
+        
+    def load_info_db(self):
+        
+        #1. Get ID Users from a playlist collaborative to start the flow process
+        users_list = self.get_users_from_playlist()
+        users_list.append('meyas5')
+        users_list.append('smedjan')
+        #2. Get user info for db
+        users = self.get_users_info(users_list)
+        i = 0
+        data = {
+                    "id": "meyas5",
+                    "display_name": "meyas5",
+                    "active":"true"
+                }
+            
+        request = requests.post(USER_URL, data)
+        print(f'status_code:{request.status_code}')
+        print(f'content:{request.content}')
+        print(f'text:{request.text}')
+
+        '''
+        for user in users:
+            data = user
+            i = i + 1
+            
+            playlists = self.get_user_playlists(user['id'])
+            if user['id'] == 'meyas5':
+                    print(f'-------MEYAS5-------')
+                    print(json.dumps(data, indent=4))
+                    print(f'-------PLAYLISTS-------')
+                    print(json.dumps(playlists , indent=4))
+                    print('----------------------------------')
+           
+            for playlist in playlists:
+                #aqui se debe crear la pleyalist en bd
+                print('----------------------------------')
+                if user['id'] == 'meyas5':
+                    print(f'-------User {i}-------')
+                    print(json.dumps(data, indent=4))
+                    print(f'-------PLAYLISTS-------')
+                    print(json.dumps(playlists , indent=4))
+                    print('----------------------------------')
+        '''
+
 
     
+
     def get_users_info(self, userlist = []):
-        #Get user profile from spotify
+        
         user_list = []
         for user_id in userlist:
             request = requests.get(BASE_URL + 'users/'+ user_id,
-                                   headers=self.headers).json()
-            user_list.append(request)  
+                                   headers=self.headers).json()    
+              
+            user_list.append(
+                    {
+                        'id'           : request['id'],
+                        'display_name' : request['display_name']
+
+                    }
+            )
         return user_list
+
+
 
     def get_users_from_playlist(self):
         playlist_id_in = ['3tRAm0o0uT2EcyTPOBAwkN']
@@ -117,40 +173,16 @@ class Spotify():
         return playlist_items_info
 
     
-    def load_users(self):
-        users_list = self.get_users_from_playlist()
-        user_info_data = []
-        user_url_path = 'http://127.0.0.1:8000/api/users/'
-        users_list.append('meyas5')
-        users_list.append('smedjan')
-        users = self.get_users_info(users_list)
-        user_list_out = []
-        for user in users:
-            user_info_data.append(
-                {
-                    'id'           : user['id'],
-                    'display_name' : user['display_name']
-
-                }
-                )
-            '''
-            response = requests.post(user_url_path, data=data).status_code
-            
-            if response == '201' or response == '400':
-                user_list_out.append(user['id'])      
-            else:
-                user_list_out.append(user['id'])
-            '''
-            user_list_out.append(user['id'])
-        return user_list_out
+    
+    
 
     def load_user_playlists(self, user_list=[]):
-        playlist_url_path = 'http://127.0.0.1:8000/api/playlist/'
         for user in user_list:
             
             user_playlists = self.get_user_playlists(user)
             print('-------USER----------')
             print(user)
+
             for playlist in user_playlists :
                 print(playlist)
                 #response = requests.post(playlist_url_path, data=playlist)

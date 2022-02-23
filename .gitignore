@@ -141,4 +141,7 @@ media
 
 db.sqlite3
 mydatabase
-notas
+
+json_examples
+.json_examples
+json_examples/

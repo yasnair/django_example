@@ -1,25 +1,25 @@
-import imp
-from xml.etree.ElementInclude import include
-from django.urls import path
-from rest_framework.routers import DefaultRouter
+
+from cgitb import lookup
+from django.urls import path, include
+from rest_framework_nested import routers
 from . import views
-import pprint
+from pprint import pprint
 
 
 
-router = DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'playlist', views.PlaylistViewSet)
-router.urls
+router = routers.DefaultRouter()
+router.register('users', views.UserViewSet)
+#router.register('playlists', views.PlaylistViewSet)
+users_router=routers.NestedDefaultRouter(router, 'users', lookup='user')
+users_router.register('playlists', views.PlaylistViewSet, basename='user-playlists')
 
 
+# The API URLs are now determined automatically by the router.
+urlpatterns = [
+    path('', include(router.urls)),
+    path('', include(users_router.urls)),
+]
 
-#URLConf
-urlpatterns = router.urls
-#
-#urlpatterns = [
-#   path('', include(router.urls)),
-#]
 
 
 
