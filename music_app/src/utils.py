@@ -1,18 +1,9 @@
 from http.client import OK
 from re import I, S
 from requests.sessions import session
+from constants import AUTH_URL, CLIENT_ID, CLIENT_SECRET, BASE_URL, USER_URL, REDIRECT_URI
 import requests
 import os, json
-
-#Urls constants
-AUTH_URL = 'https://accounts.spotify.com/api/token'
-BASE_URL = 'https://api.spotify.com/v1/'
-USER_URL = 'http://127.0.0.1:8000/api/users/'
-
-#This must be in enviroment variables
-CLIENT_ID = "5727d237fa69491eafa4979065ac7649"
-CLIENT_SECRET = "4470b556a7464f6d84cb511eba1fb2b3"
-REDIRECT_URI = ""
 
 #Custom class
 #Class to access Spotify API
@@ -47,55 +38,23 @@ class Spotify():
         self.expires_in  = auth_response['expires_in']
         self.headers['Authorization'] = 'Bearer {token}'.format(token=self.token)
 
-        #return auth_response 
-        
-    def load_info_db(self):
+
+    #Load info to DB fetching Spotify data
+    def load_users_db(self):
         
         #1. Get ID Users from a playlist collaborative to start the flow process
-        users_list = self.get_users_from_playlist()
-        users_list.append('meyas5')
-        users_list.append('smedjan')
-        #2. Get user info for db
-        users = self.get_users_info(users_list)
-        i = 0
-        data = {
-                    "id": "meyas5",
-                    "display_name": "meyas5",
-                    "active":"true"
-                }
-            
-        request = requests.post(USER_URL, data)
-        print(f'status_code:{request.status_code}')
-        print(f'content:{request.content}')
-        print(f'text:{request.text}')
-
-        '''
+        users = self.get_users_from_playlist()
+        users_list = []
         for user in users:
             data = user
-            i = i + 1
-            
-            playlists = self.get_user_playlists(user['id'])
-            if user['id'] == 'meyas5':
-                    print(f'-------MEYAS5-------')
-                    print(json.dumps(data, indent=4))
-                    print(f'-------PLAYLISTS-------')
-                    print(json.dumps(playlists , indent=4))
-                    print('----------------------------------')
+            request = requests.post(USER_URL, data) #creating user
+            #if request.status_code == '201':
+            users_list.append(data)
+
+        return  users_list
+
            
-            for playlist in playlists:
-                #aqui se debe crear la pleyalist en bd
-                print('----------------------------------')
-                if user['id'] == 'meyas5':
-                    print(f'-------User {i}-------')
-                    print(json.dumps(data, indent=4))
-                    print(f'-------PLAYLISTS-------')
-                    print(json.dumps(playlists , indent=4))
-                    print('----------------------------------')
-        '''
-
-
-    
-
+    #Get user info from Spotify
     def get_users_info(self, userlist = []):
         
         user_list = []
@@ -107,13 +66,12 @@ class Spotify():
                     {
                         'id'           : request['id'],
                         'display_name' : request['display_name']
-
                     }
             )
         return user_list
 
 
-
+    #Get users from Playlists Id
     def get_users_from_playlist(self):
         playlist_id_in = ['3tRAm0o0uT2EcyTPOBAwkN']
         users_list = []
@@ -125,8 +83,13 @@ class Spotify():
             for item in list_users:
                 if item['added_by']['id'] not in users_list:
                     users_list.append(item['added_by']['id'])
-                
-        return users_list
+
+        users_list.append('meyas5')
+        users_list.append('smedjan')  
+
+        users = self.get_users_info(users_list)      
+        return users
+
                 
     def get_user_playlists(self, user_id):
         
@@ -145,7 +108,7 @@ class Spotify():
                  'name'         : playlist['name'], 
                  'collaborative': playlist['collaborative'],
                  'public'       : playlist['public'],
-                 'description'  : playlist['description']
+                 'description'  : playlist['description'],
                 }
                 )
         return playlist_info 
@@ -174,20 +137,25 @@ class Spotify():
 
     
     
-    
-
+    #Create playlist to a user in DB
     def load_user_playlists(self, user_list=[]):
+        users_playlist = []
+        
         for user in user_list:
-            
+        
             user_playlists = self.get_user_playlists(user)
-            print('-------USER----------')
-            print(user)
 
             for playlist in user_playlists :
-                print(playlist)
+                if user == 'meyas5':
+                    print('-----PLAYLISTS-MEYAS5-------')
+                    print(playlist)
                 #response = requests.post(playlist_url_path, data=playlist)
                 #if response == '201': #Succesful
                     #Here should associate playlist-user
+        return users_playlist 
+         
+        
+            
             
 
 

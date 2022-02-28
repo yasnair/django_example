@@ -138,5 +138,13 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CLIENT_ID = os.environ.get('CLIENT_ID')
+REST_FRAMEWORK = {
+    'DATETIME_INPUT_FORMATS': ['%Y-%m-%d %H:%M',],
+    'DATETIME_FORMAT': '%Y-%m-%d %H:%M',
+}
+
+#setting variables to acces spotify api
+CLIENT_ID  = env("CLIENT_ID")
+
+
 

@@ -9,8 +9,8 @@ from rest_framework import generics, status
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from .serializers import UserSerializer, PlaylistSerializer, AlbumSerializer, TrackSerializer, ArtistSerializer
-from .models import Album, User
+from .serializers import UserSerializer, PlaylistSerializer, ArtistSerializer, AlbumSerializer, TrackSerializer
+from .models import Album, Artist, User, Track
 
 
 
@@ -27,35 +27,50 @@ class UserViewSet(ModelViewSet):
 
 #Playlist
 class PlaylistViewSet(ModelViewSet):
-    queryset  = Playlist.objects.all()
     serializer_class = PlaylistSerializer
-    #lookup_field = 'playlist_id'
 
     def get_queryset(self):
-        return Playlist.objects.filter(users__id = self.kwargs['user_pk'])
+        return Playlist.objects.filter(users__id = self.kwargs['user_pk']).filter(active=True)
 
     
     def get_serializer_context(self):
         return {'users_id': self.kwargs['user_pk']}
 
-
-#Album
-class AlbumViewSet(ModelViewSet):
-    queryset = Album.objects.all()
-    serializer_class = AlbumSerializer
-    
-    def get_serializer_context(self):
-        return {'request': self.request}    
-
 #Artist
-class AlbumViewSet(ModelViewSet):
-    queryset = Album.objects.all()
-    serializer_class = AlbumSerializer
+class ArtistViewSet(ModelViewSet):
+    queryset = Artist.objects.filter(active=True)
+    serializer_class = ArtistSerializer
     
     def get_serializer_context(self):
         return {'request': self.request} 
 
-   
+
+#Album
+class AlbumViewSet(ModelViewSet):
+    serializer_class = AlbumSerializer
+    
+    def get_queryset(self):
+        return Album.objects.filter(artist__id = self.kwargs['artist_pk']).filter(active=True)
+
+    
+    def get_serializer_context(self):
+        return {
+            'artist_id': self.kwargs['artist_pk'],
+            'album_id': self.kwargs['pk'],
+        }  
+
+#Track
+class TrackViewSet(ModelViewSet):
+    serializer_class = TrackSerializer
+
+    def get_queryset(self):
+        return Track.objects.filter(artist__id = self.kwargs['artist_pk']).filter(active=True)
+
+
+
+
+
+
 
         
         
